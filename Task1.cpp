@@ -1,6 +1,6 @@
 //Нахождение арбитража на матрице обменных курсов
 //Применён алгоритм Беллмана- Форда.
-//Если алг. зациклевается, значит никак не достигается 
+//Если алг. зациклевваетсяя, значит никак не достигается 
 //наибольшее значение => сущ-ет цикл, проходя по которому 
 //можно увеличивать кол-во денег.
 
@@ -31,12 +31,39 @@ void show(vector<double> &d) {
 	}
 }
 
-void solve(vector<edge> e, vector<double> &d) {
+/*void solve(vector<edge> e, vector<double> &d) {
 	for (int i = 0; i < count - 1; ++i)		//n-1 (т.е. кол-во вершин - 1) раз
 		for (int j = 0; j < e.size(); ++j)  //перебираем все ребра
 			if ((d[e[j].a] < INF) && (e[j].cost != 0) && (e[j].cost != -1))	//если ребро есть
 				d[e[j].b] = std::min(d[e[j].b], d[e[j].a] + e[j].cost);		
 	show(d);
+}*/
+
+bool solve(vector<edge> e, vector<double> &d) 		//В среднем, работает быстрее- за счет отбрасывания "пустых" прогонов
+{
+	for (int i = 0; i < count; ++i)
+		d.push_back(maxim);
+	d[1] = 1;
+	
+	int count_loops = 0;
+
+	for (;;) {
+		bool any = false;
+		++count_loops;
+		for (int j = 0; j < e.size(); ++j) {
+			if ((e[j].cost != 0) && (e[j].cost != -1))
+			{
+				if (d[e[j].b] < d[e[j].a] * e[j].cost) {
+					d[e[j].b] = d[e[j].a] * e[j].cost;
+					any = true;
+				}
+			}
+		}
+		if (count_loops > count * e.size())
+			return true;
+		if (!any)  break;
+	}
+	return false;
 }
 
 
