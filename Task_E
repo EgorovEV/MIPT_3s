@@ -1,0 +1,91 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <utility>
+#include <queue>
+
+using std::cout;
+using std::cin;
+using std::vector;
+using std::queue;
+using std::pair;
+
+std::ifstream file("input.txt");
+
+
+
+int FindPath(vector<vector<int> > &gr, vector<vector<int> > &f, int source, int target, int edges_count, int vertex_count) {
+	queue<int> q;
+	q.push(source);
+	vector<int> way(vertex_count);
+	way[target] = -1; // особая метка для стока
+	int i;
+	int CurVertex;
+	vector<int> Flow;
+	Flow.assign(vertex_count, 0);
+	Flow[source] = 1001;
+	while (way[target] == -1 && !q.empty())
+	{
+		CurVertex = q.front();
+		q.pop();
+		for (i = 0; i < vertex_count; i++)
+			if ((gr[CurVertex][i] - f[CurVertex][i]) > 0 && Flow[i] == 0)
+			{
+				q.push(i);
+				way[i] = CurVertex;
+				if (gr[CurVertex][i] - f[CurVertex][i] < Flow[CurVertex])
+					Flow[i] = (gr[CurVertex][i]);
+				else
+					Flow[i] = Flow[CurVertex];
+			}
+	}
+	// закончив поиск пути
+	if (way[target] == -1) return 0;
+	CurVertex = target;
+	while (CurVertex != source) // путь из стока в исток мы восстанавливаем с помощью массива way
+	{
+		f[way[CurVertex]][CurVertex] += Flow[target];
+		CurVertex = way[CurVertex];
+	}
+	return Flow[target];
+}
+
+int search_max_flow(vector<vector<int> > &gr, int source, int target, int edges_count, int vertex_count) {
+	vector<vector<int>> f(vertex_count);
+	for (int i = 0; i < vertex_count; ++i) {
+		f[i].assign(vertex_count, 0);
+	}
+	int MaxFlow = 0; 
+	int AddFlow;
+	do
+	{
+		AddFlow = FindPath(gr, f, source, target, edges_count, vertex_count);
+		MaxFlow += AddFlow;
+	} while (AddFlow >0);
+	return MaxFlow;
+}
+
+int main() {
+	int vertex_count = -1;
+	int start, finish, edges_count;
+	vector<vector<int> > gr;
+	while (vertex_count != 0) {
+		file >> vertex_count;
+		if (vertex_count == 0) { break; }
+		
+		 file >> start >> finish >> edges_count;
+		gr.resize(vertex_count);
+		for (int i = 0; i < vertex_count; ++i) {
+			gr[i].assign(vertex_count, 0);
+		}
+		int from, to, flow;
+		for (int i = 0; i < edges_count; ++i) {
+			file >> from >> to >> flow;
+			gr[from - 1][to - 1] += flow;
+			gr[to - 1][from - 1] += flow;
+			}
+		edges_count = 0;
+		cout << search_max_flow(gr, start - 1, finish - 1, edges_count, vertex_count) << ' ';
+	}
+	return 0;
+}
