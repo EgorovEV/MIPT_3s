@@ -1,0 +1,57 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <utility>
+#include <algorithm>
+
+using std::vector;
+using std::cout;
+using std::pair;
+
+std::ifstream file("kruskal.in");
+std::ofstream outfile("kruskal.out");
+
+bool comparator(pair<pair<int, int>, int> g1, pair<pair<int, int>, int> g2) {
+	return g2.second > g1.second;
+}
+
+void rename_tree_id(vector<int>& tree_id, int new_tree_id, int old_tree_id, int vertexes) {
+	for (int i = 0; i < vertexes; ++i) {
+		if (tree_id[i] == old_tree_id)
+			tree_id[i] = new_tree_id;
+	}
+}
+
+int Kruskal(vector <pair<pair<int, int>, int> >& g, int vertexes) {
+	int minimum_spanning_tree_weight = 0;
+
+	sort(g.begin(), g.end(), comparator);
+
+	vector<int> tree_id(vertexes);
+	for (int i = 0; i < tree_id.size(); ++i)
+		tree_id[i] = i;
+
+	for (size_t i = 0; i < g.size(); ++i) {
+		if (tree_id[g[i].first.first] != tree_id[g[i].first.second]) {
+			minimum_spanning_tree_weight += g[i].second;
+			rename_tree_id(tree_id, tree_id[g[i].first.first], tree_id[g[i].first.second], vertexes);
+		}
+	}
+	return minimum_spanning_tree_weight;
+}
+
+int minimum_spanning_tree_weight(vector <pair<pair<int, int>, int> >& g, int vertexes) {
+	return Kruskal(g, vertexes);
+}
+
+int main() {
+	int vertexes, edges;
+	file >> vertexes >> edges;
+	vector <pair<pair<int, int>, int> > graph(edges);
+	
+	for (int i = 0; i < edges; ++i) {
+		file >> graph[i].first.first >> graph[i].first.second >> graph[i].second;
+		--graph[i].first.first; --graph[i].first.second;
+	}
+	outfile << minimum_spanning_tree_weight(graph, vertexes);
+}
