@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using std::vector;
+using std::cin;
+using std::cout;
+using std::string;
+
+void pref_func(const string &str, vector<int> &pi) {
+	int n = (int)str.length();
+	pi.resize(n);
+	pi[0] = 0;
+	for (int k = 0; k < n - 1; ++k) {
+		int p = pi[k];
+		while (p != 0 && str[k + 1] != str[p]) {
+			p = pi[p - 1];
+		}
+		pi[k + 1] = p + (str[k + 1] == str[p] ? 1 : 0);
+	}
+	for (auto i : pi) {
+		cout << i << '_';
+	}
+	cout << std::endl;
+}
+
+void search_entrance(const string &str, const string &pattern, vector<int> &positions) {
+	string strForSearch = pattern + '$' + str;
+	vector<int> pi;
+	pref_func(strForSearch, pi);
+	int prev = 0;
+	for (int j = 0; j < str.length(); ++j) {
+		if (str[j] == pattern[prev]) {
+			++prev;
+			if (prev == pattern.length()) {
+				positions.push_back(j - (pattern.length() - 1));
+				prev -= 1;
+			}
+		}
+		else {
+			prev = pi[j + pattern.length() + 1];
+		}
+	}
+}
+
+int main() {
+	string str, pattern;
+	cin >> pattern >> str;
+	vector<int> positions;
+	search_entrance(str, pattern, positions);
+	for (auto pos : positions) {
+		cout << pos << ' ';
+	}
+	cout << std::endl;
+	return 0;
+}
